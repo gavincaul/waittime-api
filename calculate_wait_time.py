@@ -123,16 +123,3 @@ def calculate_wait_time(lat,lon):
     return time
 
 
-print("Back of Deer Park:", calculate_wait_time(39.683360355019296, -75.75584360100328)) 
-print("Mid way Point:", calculate_wait_time(39.683251985071145, -75.75583153106373)) 
-print("Behind (middle) Deer Park:", calculate_wait_time(39.68338718945639, -75.75600855684388)) 
-print()
-print("to far right:", calculate_wait_time(39.68322205429359, -75.75568669178907))
-print("to far left:", calculate_wait_time(39.683225150581585, -75.75652622316565))
-print("to far top:", calculate_wait_time(39.68362719328449, -75.75609324484344))
-print("to far bottom:", calculate_wait_time(39.68298984415029, -75.75595167701535))
-
-
-
-
-

@@ -1,7 +1,8 @@
 from flask import Flask, request, jsonify
 from calculate_wait_time import calculate_wait_time  # Import your function
-
+from flask_cors import CORS
 app = Flask(__name__)
+CORS(app)
 
 @app.route('/calculate-wait-time', methods=['GET'])
 def get_wait_time():

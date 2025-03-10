@@ -2,3 +2,5 @@ flask
 geopy
 numpy
 scipy
+requests
+flask-cors

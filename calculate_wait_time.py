@@ -120,6 +120,6 @@ def calculate_wait_time(lat,lon):
         return 101010 # you are not in deer park
 
     time = (d / 2 - 5) * time_factor
-    return time
+    return round(time)
 
 

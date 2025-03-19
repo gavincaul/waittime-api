@@ -106,6 +106,40 @@ def distance_from_enterance(lat, long):
         
     return distance_feet
 
+def pseudo_prediction():
+
+    current_time = datetime.datetime.now()
+    day = current_time.weekday()
+    hour = current_time.hour
+
+
+    wait_times = {
+        (3, 18): (20, 30),  # Thursday, 6pm - 20-30 mins
+        (3, 19): (25, 35),  # Thursday, 7pm - 25-35 mins
+        (3, 20): (50, 75),  # Thursday, 8pm - 50-75 mins
+        (3, 21): (60, 90),  # Thursday, 9pm - 60-90 mins
+        (3, 22): (30, 40),  # Thursday, 10pm - 30-40 mins
+        (3, 23): (10, 10),  # Thursday, 11pm - 10 mins
+        (4, 18): (10, 10),  # Friday, 6pm - 10 mins
+        (4, 19): (10, 20),  # Friday, 7pm - 10-20 mins
+        (4, 20): (20, 35),  # Friday, 8pm - 20-35 mins
+        (4, 21): (35, 55),  # Friday, 9pm - 35-55 mins
+        (4, 22): (10, 10),  # Friday, 10pm - 10 mins
+        (4, 23): (0, 0),    # Friday, 11pm - no wait
+        (5, 18): (10, 10),  # Saturday, 6pm - 10 mins
+        (5, 19): (10, 20),  # Saturday, 7pm - 10-20 mins
+        (5, 20): (20, 35),  # Saturday, 8pm - 20-35 mins
+        (5, 21): (35, 55),  # Saturday, 9pm - 35-55 mins
+        (5, 22): (10, 10),  # Saturday, 10pm - 10 mins
+        (5, 23): (0, 0),    # Saturday, 11pm - no wait
+    }
+    wait_time = wait_times.get((day, hour))
+    
+    if wait_time:
+        return rand.randint(wait_time[0], wait_time[1])
+    else:
+        return 0
+
 
 def calculate_wait_time(lat, lon):
 
@@ -139,3 +173,4 @@ def wait_time_prediction(lat, lon, minutes, timestamp):
     return {
         "predicted_wait_time": round(adjusted_wait_time),
     }
+

@@ -30,11 +30,15 @@ def store_data_in_background(lat, lon, wait_time):
 @app.route('/predict-wait-time', methods=['GET'])
 def predict_wait_time():
     get_data_result = get_data()
-    if get_data_result == 100001:
-        return jsonify({"pseudo": pseudo_prediction()})
+    if get_data_result == 100001:  
+        return jsonify({
+            "pseudo": pseudo_prediction(),
+            "message": "1"  
+        }), 200
     else:
-        return jsonify({"wait_time_prediction": wait_time_prediction(get_data_result[0], get_data_result[1], get_data_result[2], get_data_result[3])})
-
-
+        return jsonify({
+            "wait_time_prediction": wait_time_prediction(get_data_result[0], get_data_result[1], get_data_result[2], get_data_result[3]),
+            "message": "0"  
+        }), 200
 if __name__ == "__main__":
     app.run(debug=True)

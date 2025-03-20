@@ -1,54 +1,67 @@
-from pymongo import MongoClient
+from pymongo import MongoClient, errors
 import os
 from datetime import datetime, timedelta
+
 def store_data(lat, lon, timestamp, wait_time):
     mongo_uri = os.environ.get('MONGO_URI')
-    if mongo_uri:
-        client = MongoClient(mongo_uri)
-        
-        db = client["deerparkline"]
-        collection = db["deerparklineprediction"]
-        
-        new_location_data = {
-            "latitude": lat,
-            "longitude": lon,
-            "timestamp": datetime.utcnow(),
-            "wait_time": wait_time
-        }
+    if not mongo_uri:
+        print("Error: MongoDB URI not set.")
+        return
+    
+    try:
 
-        collection.insert_one(new_location_data)
-        
+        with MongoClient(mongo_uri) as client:
+            db = client["deerparkline"]
+            collection = db["deerparklineprediction"]
+            
+            new_location_data = {
+                "latitude": lat,
+                "longitude": lon,
+                "timestamp": datetime.utcnow(),
+                "wait_time": wait_time
+            }
+            collection.insert_one(new_location_data)
+            print("Data stored successfully.")
+    except errors.PyMongoError as e:
+        print(f"Error storing data: {e}")
+
 def get_data():
     mongo_uri = os.environ.get('MONGO_URI')
     if not mongo_uri:
+        print("Error: MongoDB URI not set.")
         return 404
 
-    client = MongoClient(mongo_uri)
-    db = client["deerparkline"]
-    collection = db["deerparklineprediction"]
-    
-    latest_entries = list(collection.find().sort("timestamp", -1).limit(10))
+    try:
 
-    if not latest_entries:
-        return 100001
+        with MongoClient(mongo_uri) as client:
+            db = client["deerparkline"]
+            collection = db["deerparklineprediction"]
+            
+            latest_entries = list(collection.find().sort("timestamp", -1).limit(10))
 
+            if not latest_entries:
+                print("No data found in the collection.")
+                return 100001
 
-    two_hours_ago = datetime.utcnow() - timedelta(hours=2)
+            two_hours_ago = datetime.utcnow() - timedelta(hours=2)
 
+            valid_entries = [
+                entry for entry in latest_entries
+                if entry['timestamp'] >= two_hours_ago
+            ]
 
-    valid_entries = [
-        entry for entry in latest_entries
-        if entry['timestamp'] >= two_hours_ago
-    ]
+            if not valid_entries:
+                print("No valid data within the last 2 hours.")
+                return 100001
 
-    if not valid_entries:
-        return 100001
+            longest_entry = max(valid_entries, key=lambda x: x['wait_time'])
 
-    longest_entry = max(valid_entries, key=lambda x: x['wait_time'])
+            lat = longest_entry['latitude']
+            lon = longest_entry['longitude']
+            minutes = longest_entry['wait_time']
+            timestamp = longest_entry['timestamp']
 
-    lat = longest_entry['latitude']
-    lon = longest_entry['longitude']
-    minutes = longest_entry['wait_time']
-    timestamp = longest_entry['timestamp']
-
-    return [lat, lon, minutes, timestamp]
+            return [lat, lon, minutes, timestamp]
+    except errors.PyMongoError as e:
+        print(f"Error retrieving data: {e}")
+        return 404

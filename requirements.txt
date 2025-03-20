@@ -6,4 +6,3 @@ requests
 flask-cors
 pymongo[srv]==3.12
 datetime
-threading

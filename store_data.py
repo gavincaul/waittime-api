@@ -30,7 +30,7 @@ def get_data():
     latest_entries = list(collection.find().sort("timestamp", -1).limit(10))
 
     if not latest_entries:
-        return 404
+        return 100001
 
 
     two_hours_ago = datetime.utcnow() - timedelta(hours=2)
@@ -42,7 +42,7 @@ def get_data():
     ]
 
     if not valid_entries:
-        return 404
+        return 100001
 
     longest_entry = max(valid_entries, key=lambda x: x['wait_time'])
 

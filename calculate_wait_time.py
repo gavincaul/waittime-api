@@ -160,19 +160,24 @@ def calculate_wait_time(lat, lon):
 
 
 def wait_time_prediction(lat, lon, minutes, timestamp):
-    current_time = datetime.now()
-    current_time_str = current_time.strftime('%Y-%m-%d %H:%M:%S')
-    time_difference = (current_time - timestamp).total_seconds() / 60
-    current_wait_time = calculate_wait_time(lat, lon)
+    est = pytz.timezone('America/New_York')
+    current_time = datetime.now(pytz.utc).astimezone(est)
 
+    if timestamp.tzinfo is None:
+        timestamp = pytz.utc.localize(timestamp) 
+    timestamp_est = timestamp.astimezone(est)
+
+    time_difference = (current_time - timestamp_est).total_seconds() / 60
+
+    current_wait_time = calculate_wait_time(lat, lon)
     if time_difference < 0:
         return {"error": "Timestamp is in the future"}
+
     adjusted_wait_time = current_wait_time + (time_difference / 10)
+
     if current_wait_time <= minutes:
         adjusted_wait_time = current_wait_time + (minutes / 10)
 
     return {
         "predicted_wait_time": round(adjusted_wait_time),
     }
-
-

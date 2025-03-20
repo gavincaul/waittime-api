@@ -58,7 +58,6 @@ def get_data():
                 entry for entry in latest_entries
                 if entry['timestamp'].astimezone(pytz.utc) >= two_hours_ago
             ]
-            print(valid_entries)
 
             if not valid_entries:
                 print("No valid data within the last 2 hours.")

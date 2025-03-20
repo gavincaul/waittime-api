@@ -161,7 +161,7 @@ def calculate_wait_time(lat, lon):
 
 def wait_time_prediction(lat, lon, minutes, timestamp):
     est = pytz.timezone('America/New_York')
-    current_time = datetime.now(pytz.utc).astimezone(est)
+    current_time = datetime.datetime.now(pytz.utc).astimezone(est)
 
     if timestamp.tzinfo is None:
         timestamp = pytz.utc.localize(timestamp) 

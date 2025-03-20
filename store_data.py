@@ -51,16 +51,14 @@ def get_data():
                 print("No data found in the collection.")
                 return 100001
 
-            est_tz = pytz.timezone('US/Eastern') 
-            two_hours_ago = datetime.utcnow().replace(tzinfo=pytz.utc) - timedelta(hours=2)  
-            two_hours_ago = two_hours_ago.astimezone(est_tz) 
-            print(two_hours_ago)
-            
+
+
+            two_hours_ago = datetime.utcnow().replace(tzinfo=pytz.utc) - timedelta(hours=2)
             valid_entries = [
                 entry for entry in latest_entries
-                if entry['timestamp'] >= two_hours_ago
+                if entry['timestamp'].astimezone(pytz.utc) >= two_hours_ago
             ]
-            print(latest_entries[0]['timestamp'])
+            print(valid_entries)
 
             if not valid_entries:
                 print("No valid data within the last 2 hours.")
@@ -77,3 +75,5 @@ def get_data():
     except errors.PyMongoError as e:
         print(f"Error retrieving data: {e}")
         return 404
+
+get_data()

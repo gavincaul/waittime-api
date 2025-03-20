@@ -26,7 +26,8 @@ def get_wait_time():
     result = calculate_wait_time(lat, lon)
 
     response = jsonify({"wait_time": result})
-    threading.Thread(target=store_data_in_background, args=(lat, lon, result)).start()
+    if result != 101010 and result != 111111:
+        threading.Thread(target=store_data_in_background, args=(lat, lon, result)).start()
 
     return response
 

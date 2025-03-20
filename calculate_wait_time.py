@@ -149,8 +149,6 @@ def calculate_wait_time(lat, lon):
     time_factor = calculate_time_factor()
     if time_factor == "Deer Park is closed":
         return 111111
-    if time_factor == "No line":
-        return 111000
     
     d = distance_from_enterance(lat, lon)
     if d == "You are not in Deer Park":

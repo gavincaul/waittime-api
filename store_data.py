@@ -1,6 +1,14 @@
 from pymongo import MongoClient, errors
 import os
 from datetime import datetime, timedelta
+import pytz
+
+
+def get_est_time():
+    est_tz = pytz.timezone('US/Eastern')  
+    utc_time = datetime.utcnow().replace(tzinfo=pytz.utc) 
+    est_time = utc_time.astimezone(est_tz)  
+    return est_time
 
 def store_data(lat, lon, timestamp, wait_time):
     mongo_uri = os.environ.get('MONGO_URI')
@@ -13,11 +21,11 @@ def store_data(lat, lon, timestamp, wait_time):
         with MongoClient(mongo_uri) as client:
             db = client["deerparkline"]
             collection = db["deerparklineprediction"]
-            
+            est_time = get_est_time()
             new_location_data = {
                 "latitude": lat,
                 "longitude": lon,
-                "timestamp": datetime.utcnow(),
+                "timestamp": est_time,
                 "wait_time": wait_time
             }
             collection.insert_one(new_location_data)
@@ -43,7 +51,7 @@ def get_data():
                 print("No data found in the collection.")
                 return 100001
 
-            two_hours_ago = datetime.utcnow() - timedelta(hours=2)
+            two_hours_ago = get_est_time() - timedelta(hours=2)
 
             valid_entries = [
                 entry for entry in latest_entries

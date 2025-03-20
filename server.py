@@ -4,9 +4,17 @@ from calculate_wait_time import calculate_wait_time, wait_time_prediction, pseud
 from store_data import store_data, get_data
 from flask_cors import CORS
 from datetime import datetime
-
+import pytz
 app = Flask(__name__)
 CORS(app)
+
+
+
+def get_est_time():
+    est_tz = pytz.timezone('US/Eastern')  
+    utc_time = datetime.utcnow().replace(tzinfo=pytz.utc) 
+    est_time = utc_time.astimezone(est_tz)  
+    return est_time
 
 @app.route('/calculate-wait-time', methods=['GET'])
 def get_wait_time():
@@ -24,7 +32,7 @@ def get_wait_time():
 
 
 def store_data_in_background(lat, lon, wait_time):
-    timestamp = datetime.utcnow()  
+    timestamp = get_est_time() 
     store_data(lat, lon, timestamp, wait_time)
 
 @app.route('/predict-wait-time', methods=['GET'])

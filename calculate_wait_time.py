@@ -6,6 +6,7 @@ from geopy.distance import geodesic
 import random as rand
 import numpy as np
 from scipy.interpolate import CubicSpline
+import pytz
 
 
 
@@ -34,7 +35,8 @@ def calculate_weater_const(today_forecast):
 
 
 def calculate_time_factor():
-    time = datetime.datetime.now()
+    eastern_time_zone = pytz.timezone('US/Eastern')
+    time = datetime.datetime.now(eastern_time_zone)
     day = time.weekday()
 
     if time.hour <= 10 and time.hour >= 1: # 1am to 10am its closed
@@ -108,7 +110,8 @@ def distance_from_enterance(lat, long):
 
 def pseudo_prediction():
 
-    current_time = datetime.datetime.now()
+    eastern_time_zone = pytz.timezone('US/Eastern')
+    current_time = datetime.datetime.now(eastern_time_zone)
     day = current_time.weekday()
     hour = current_time.hour
 
@@ -173,4 +176,5 @@ def wait_time_prediction(lat, lon, minutes, timestamp):
     return {
         "predicted_wait_time": round(adjusted_wait_time),
     }
+
 

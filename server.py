@@ -1,5 +1,7 @@
 from flask import Flask, request, jsonify
 import threading
+
+import numpy as np
 from calculate_wait_time import calculate_wait_time, wait_time_prediction, pseudo_prediction, calculate_wait_time_debug, wait_time_prediction_debug, pseudo_prediction_debug
 from store_data import store_data, get_data
 from flask_cors import CORS
@@ -61,12 +63,13 @@ def calculate_wait_timeD():
 
     if lat is None or lon is None:
         return jsonify({"error": "Missing coordinates"}), 400
-    if min is None or hour is None or day is None:
-        result = calculate_wait_time_debug(lat, lon)
-    else:
-        result = calculate_wait_time_debug(lat, lon, min, hour, day)
-    response = jsonify(result)
-    return response
+
+    result = calculate_wait_time_debug(lat, lon, min, hour, day)
+
+    if isinstance(result["time_factor"], np.ndarray):
+        result["time_factor"] = result["time_factor"].tolist()
+
+    return jsonify(result)
 
 @app.route('/predict-wait-time-debug', methods=['GET'])
 def predict_wait_timeD():

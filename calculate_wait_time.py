@@ -213,7 +213,7 @@ def calculate_wait_time_debug(lat, lon, min=None, hour=None, day=None):
         time_factor = spline(t)
     else:
         time_factor = 1  
-    if time_factor == "Deer Park is closed":
+    if hour <= 10 and hour >= 1:
         return {
             "code": 111111,
             "distance": 0,

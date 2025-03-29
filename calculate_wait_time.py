@@ -181,3 +181,145 @@ def wait_time_prediction(lat, lon, minutes, timestamp):
     return {
         "predicted_wait_time": round(adjusted_wait_time),
     }
+
+
+
+
+def calculate_wait_time_debug(lat, lon, min=None, hour=None, day=None):
+    eastern_time_zone = pytz.timezone('US/Eastern')
+    current_time = datetime.datetime.now(eastern_time_zone)
+
+    # Use current time if min, hour, or day are not provided
+    if day is None:
+        day = current_time.weekday()
+    if hour is None:
+        hour = current_time.hour
+    if min is None:
+        min = current_time.minute
+
+    # Calculate time factor based on the provided or current time
+    factors_per_hour = {
+        3: {17: 1.25, 18: 1.35, 19: 1.45, 20: 1.55, 21: 1.55, 22: 1.45, 23: 1.35},  # Thursday
+        4: {17: 1.25, 18: 1.35, 19: 1.45, 20: 1.55, 21: 1.55, 22: 1.45, 23: 1.35},  # Friday
+        5: {17: 1.25, 18: 1.35, 19: 1.45, 20: 1.55, 21: 1.55, 22: 1.45, 23: 1.35},  # Saturday
+        6: {17: 1.25, 18: 1.35, 19: 1.45, 20: 1.55, 21: 1.55, 22: 1.45, 23: 1.35}   # Sunday
+    }
+
+    if day in factors_per_hour:
+        x = np.array(list(factors_per_hour[day].keys()))
+        y = np.array(list(factors_per_hour[day].values()))
+        spline = CubicSpline(x, y)
+        t = hour + min / 60
+        time_factor = spline(t)
+    else:
+        time_factor = 1  
+    if time_factor == "Deer Park is closed":
+        return {
+            "code": 111111,
+            "distance": 0,
+            "time_factor": 0,
+            "wait_time": 0,
+            "day": day,
+            "hour": hour,
+            "minute": min,
+            "message": "Deer Park is closed"
+        }
+    d = distance_from_enterance(lat, lon)
+    if d == "You are not in Deer Park":
+        return {
+            "code": 101010,
+            "distance": 0,
+            "time_factor": 0,
+            "wait_time": 0,
+            "day": day,
+            "hour": hour,
+            "minute": min,
+            "message": "You are not in Deer Park"
+        }
+
+
+    time = (d / 2 - 5) * time_factor
+
+    return {
+        "code": 200,
+        "distance": round(d),
+        "time_factor": time_factor,
+        "wait_time": round(time),
+        "day": day,
+        "hour": hour,
+        "minute": min
+    }
+
+
+
+def wait_time_prediction_debug(lat, lon, minutes=None, day=None, hour=None):
+
+    eastern_time_zone = pytz.timezone('US/Eastern')
+    current_time = datetime.datetime.now(eastern_time_zone)
+
+    if day is None:
+        day = current_time.weekday()
+    if hour is None:
+        hour = current_time.hour
+    if minutes is None:
+        minutes = current_time.minute
+
+
+    current_wait_time = calculate_wait_time_debug(lat, lon, minutes, hour, day)
+
+    if "error" in current_wait_time:
+        return current_wait_time
+
+    est = pytz.timezone('America/New_York')
+    timestamp_est = datetime.datetime(
+        current_time.year, current_time.month, current_time.day,
+        hour, minutes, 0, tzinfo=est
+    )
+
+    time_difference = (current_time - timestamp_est).total_seconds() / 60
+
+    if time_difference < 0:
+        return {"error": "Timestamp is in the future"}
+
+    adjusted_wait_time = current_wait_time["wait_time"] + (time_difference / 10)
+
+    return {
+        "predicted_wait_time": round(adjusted_wait_time),
+        "current_wait_time": current_wait_time["wait_time"],
+        "distance": current_wait_time["distance"],
+        "time_factor": current_wait_time["time_factor"],
+        "day": day,
+        "hour": hour,
+        "minute": minutes,
+        "time_difference": round(time_difference, 2)
+    }
+def pseudo_prediction_debug(day, hour):
+
+
+
+    wait_times = {
+        (3, 18): (20, 30),  # Thursday, 6pm - 20-30 mins
+        (3, 19): (25, 35),  # Thursday, 7pm - 25-35 mins
+        (3, 20): (50, 75),  # Thursday, 8pm - 50-75 mins
+        (3, 21): (60, 90),  # Thursday, 9pm - 60-90 mins
+        (3, 22): (30, 40),  # Thursday, 10pm - 30-40 mins
+        (3, 23): (10, 10),  # Thursday, 11pm - 10 mins
+        (4, 18): (10, 10),  # Friday, 6pm - 10 mins
+        (4, 19): (10, 20),  # Friday, 7pm - 10-20 mins
+        (4, 20): (20, 35),  # Friday, 8pm - 20-35 mins
+        (4, 21): (35, 55),  # Friday, 9pm - 35-55 mins
+        (4, 22): (10, 10),  # Friday, 10pm - 10 mins
+        (4, 23): (0, 0),    # Friday, 11pm - no wait
+        (5, 18): (10, 10),  # Saturday, 6pm - 10 mins
+        (5, 19): (10, 20),  # Saturday, 7pm - 10-20 mins
+        (5, 20): (20, 35),  # Saturday, 8pm - 20-35 mins
+        (5, 21): (35, 55),  # Saturday, 9pm - 35-55 mins
+        (5, 22): (10, 10),  # Saturday, 10pm - 10 mins
+        (5, 23): (0, 0),    # Saturday, 11pm - no wait
+    }
+    wait_time = wait_times.get((day, hour))
+    
+    if wait_time:
+        return rand.randint(wait_time[0], wait_time[1])
+    else:
+        return 0

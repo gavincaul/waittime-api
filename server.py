@@ -77,7 +77,7 @@ def predict_wait_time_debug():
 
     if get_data_result == 100001:
         return jsonify({
-            "pseudo": pseudo_prediction(day, hour),
+            "pseudo": pseudo_prediction_debug(day, hour),
             "message": "1"
         }), 200
 

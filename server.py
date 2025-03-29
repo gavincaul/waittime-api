@@ -52,7 +52,7 @@ def predict_wait_time():
     
 
 @app.route('/calculate-wait-time-debug', methods=['GET'])
-def calculate_wait_time_debug():
+def calculate_wait_timeD():
     lat = request.args.get('lat', type=float)
     lon = request.args.get('lon', type=float)
     min = request.args.get('min', type=int)
@@ -69,7 +69,7 @@ def calculate_wait_time_debug():
     return response
 
 @app.route('/predict-wait-time-debug', methods=['GET'])
-def predict_wait_time_debug():
+def predict_wait_timeD():
     min = request.args.get('min', type=int)
     hour = request.args.get('hour', type=int)
     day = request.args.get('day', type=int)

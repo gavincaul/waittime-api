@@ -39,7 +39,8 @@ def calculate_time_factor():
     time = datetime.datetime.now(eastern_time_zone)
     day = time.weekday()
 
-    if time.hour <= 10 and time.hour >= 1: # 1am to 10am its closed
+
+    if time.hour < 10 and time.hour >= 1: # 1am to 10am its closed
         return "Deer Park is closed"
 
     if day <= 2: # Monday, Tuesday, Wednesday there's never a line 
@@ -213,7 +214,7 @@ def calculate_wait_time_debug(lat, lon, min=None, hour=None, day=None):
         time_factor = spline(t)
     else:
         time_factor = 1  
-    if hour <= 10 and hour >= 1:
+    if hour < 10 and hour >= 1:
         return {
             "code": 111111,
             "distance": 0,
@@ -323,3 +324,39 @@ def pseudo_prediction_debug(day, hour):
         return rand.randint(wait_time[0], wait_time[1])
     else:
         return 0
+
+
+
+
+
+'''
+    top left 
+    39.68338225968945, -75.7562183888234
+
+    bottom right
+    39.68307030354003, -75.75565931701483
+
+
+    if not ( long > top_left[1] and long < bottom_right[1] and lat < top_left[0] and lat > bottom_right[0]) :
+        return "You are not in Deer Park"
+'''
+from unittest import TestCase
+
+TestCase().assertEqual(calculate_wait_time(39.68350, -75.75650), 101010)  # Outside (top-right)
+TestCase().assertEqual(calculate_wait_time(39.68290, -75.75500), 101010)  # Outside (bottom-left)
+TestCase().assertEqual(calculate_wait_time(39.68360, -75.75570), 101010)  # Outside (above)
+TestCase().assertEqual(calculate_wait_time(39.68310, -75.75630), 101010)  # Outside (left)
+# 39.68320, -75.75590 -- inside
+TestCase().assertEqual(calculate_wait_time_debug(39.68320, -75.75590, 0, 9, 1)["code"], 111111)  # Closed  
+TestCase().assertEqual(calculate_wait_time_debug(39.68320, -75.75590, 0, 1, 1)["code"], 111111)  # Closed  
+TestCase().assertEqual(calculate_wait_time_debug(39.68320, -75.75590, 0, 10, 1)["code"], 200)  # Open
+
+
+wait_time = pseudo_prediction_debug(4, 18)  # Friday, 6pm
+TestCase().assertGreaterEqual(wait_time, 10)
+TestCase().assertLessEqual(wait_time, 30)
+
+wait_time = pseudo_prediction_debug(3, 20)  # Thursday, 8pm
+TestCase().assertGreaterEqual(wait_time, 60)
+TestCase().assertLessEqual(wait_time, 90)
+
